@@ -1,0 +1,173 @@
+
+## Symfony 1.2
+
+    [php]
+    object serialization
+
+## Symfony 1.3
+
+    [php]
+    $map['caretaker_export'] = new sfDoctrineRoute('/caretaker/:id/export/:document', array (
+      'module' => 'mbCaretaker',
+      'action' => 'export',
+    ), array (
+      'sf_method' => 'get',
+      'id' => '[^/\\.]+',
+      'document' => '[^/\\.]+',
+    ), array (
+      'suffix' => '',
+      'variable_prefixes' =>
+      array (
+        0 => ':',
+      ),
+      'segment_separators' =>
+      array (
+        0 => '/',
+        1 => '.',
+      ),
+      'variable_regex' => '[\\w\\d_]+',
+      'text_regex' => '.+?',
+      'generate_shortest_url' => true,
+      'extra_parameters_as_query_string' => true,
+      'load_configuration' => true,
+      'default_module' => 'default',
+      'default_action' => 'index',
+      'debug' => false,
+      'logging' => '',
+      'lazy_routes_deserialize' => true,
+      'model' => 'Caretaker',
+      'type' => 'object',
+      'object_model' => 'Caretaker',
+      'variable_prefix_regex' => '(?:\\:)',
+      'segment_separators_regex' => '(?:/|\\.)',
+      'variable_content_regex' => '[^/\\.]+',
+    ));
+    $map['caretaker_export']->setCompiledData(array (
+      'tokens' =>
+      array (
+        0 =>
+        array (
+          0 => 'separator',
+          1 => '',
+          2 => '/',
+          3 => NULL,
+        ),
+        1 =>
+        array (
+          0 => 'text',
+          1 => '/',
+          2 => 'caretaker',
+          3 => NULL,
+        ),
+        2 =>
+        array (
+          0 => 'separator',
+          1 => '',
+          2 => '/',
+          3 => NULL,
+        ),
+        3 =>
+        array (
+          0 => 'variable',
+          1 => '/',
+          2 => ':id',
+          3 => 'id',
+        ),
+        4 =>
+        array (
+          0 => 'separator',
+          1 => '',
+          2 => '/',
+          3 => NULL,
+        ),
+        5 =>
+        array (
+          0 => 'text',
+          1 => '/',
+          2 => 'export',
+          3 => NULL,
+        ),
+        6 =>
+        array (
+          0 => 'separator',
+          1 => '',
+          2 => '/',
+          3 => NULL,
+        ),
+        7 =>
+        array (
+          0 => 'variable',
+          1 => '/',
+          2 => ':document',
+          3 => 'document',
+        ),
+      ),
+      'default_parameters' =>
+      array (
+      ),
+      'default_options' =>
+      array (
+        'load_configuration' => true,
+        'suffix' => '',
+        'default_module' => 'default',
+        'default_action' => 'index',
+        'debug' => false,
+        'logging' => '',
+        'generate_shortest_url' => true,
+        'extra_parameters_as_query_string' => true,
+        'lazy_routes_deserialize' => true,
+      ),
+      'options' =>
+      array (
+        'suffix' => '',
+        'variable_prefixes' =>
+        array (
+          0 => ':',
+        ),
+        'segment_separators' =>
+        array (
+          0 => '/',
+          1 => '.',
+        ),
+        'variable_regex' => '[\\w\\d_]+',
+        'text_regex' => '.+?',
+        'generate_shortest_url' => true,
+        'extra_parameters_as_query_string' => true,
+        'load_configuration' => true,
+        'default_module' => 'default',
+        'default_action' => 'index',
+        'debug' => false,
+        'logging' => '',
+        'lazy_routes_deserialize' => true,
+        'model' => 'Caretaker',
+        'type' => 'object',
+        'object_model' => 'Caretaker',
+        'variable_prefix_regex' => '(?:\\:)',
+        'segment_separators_regex' => '(?:/|\\.)',
+        'variable_content_regex' => '[^/\\.]+',
+      ),
+      'pattern' => '/caretaker/:id/export/:document',
+      'regex' => '#^
+    /caretaker
+    /(?P<id>[^/\\.]+)
+    /export
+    /(?P<document>[^/\\.]+)
+    $#x',
+      'variables' =>
+      array (
+        'id' => ':id',
+        'document' => ':document',
+      ),
+      'defaults' =>
+      array (
+        'module' => 'mbCaretaker',
+        'action' => 'export',
+      ),
+      'requirements' =>
+      array (
+        'sf_method' => 'get',
+        'id' => '[^/\\.]+',
+        'document' => '[^/\\.]+',
+      ),
+      'suffix' => '',
+    ));

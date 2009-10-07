@@ -1,0 +1,124 @@
+# swOptimizeRoutesPlugins
+
+Symfony routing system is quite powerfull as you can create any kind of sexy
+url based on parameters. However the downside of this is this required a lot of
+time/CPU to match a route.
+
+The nature of PHP does not help either: you cannot store in memory routes
+for easy reuse. So at every request, symfony has to deserialize/load routes from
+cache, reassign routes to the `sfRouting` object and match the route. If your
+application has many routes this can take up to 10% just to find the route.
+
+## To be confirmed ;)
+
+Thanks to symfony's routing system and factories options, there is an original
+way to save some time : `mod_rewrite`. Most modern web servers (apache, lighttpd,
+nginx, and more ? ) have a built in option to parse url. But with 2 big advantages
+that symfony/PHP cannot compete with :
+
+  - rewrite routes are stored at the server level : in memory, no reload
+  - C or C++ preg will always go faster than PHP functions
+
+This plugin just read routes from the routing.yml file and translate them into
+mod_rewrite route.
+
+## Installation on Apache web servers
+
+* Settings up a vhost with `mod_rewrite` enabled
+
+
+        <VirtualHost *:80>
+          ServerAdmin webmaster@dummy-host.example.com
+          DocumentRoot "/Users/rande/Projects/cassoulet/web"
+          ServerName local.cassoulet.fr
+          ErrorLog "logs/cassoulet-error_log"
+          CustomLog "logs/cassoulet-access_log" common
+      
+          <IfModule mod_rewrite.c>
+            <directory "/Users/rande/Projects/cassoulet/web">
+              RewriteEngine On
+              #RewriteBase /
+              #
+              #
+              # This is the tricky part, the futurs routes will be defined
+              # in the mod_rewrite.conf file.
+              # so it will be easy to deploy on update
+              Include "/Users/rande/Projects/cassoulet/mod_rewrite.conf"
+              #
+              # we skip all files with .something
+              RewriteCond %{REQUEST_URI} \..+$
+              RewriteCond %{REQUEST_URI} !\.html$
+              # enable this line if your application need to serve
+              # xml or json content.
+              #RewriteCond %{REQUEST_URI} !\.xml$
+              #RewriteCond %{REQUEST_URI} !\.json$
+              RewriteRule .* - [L]
+              #
+              # we check if the .html version is here (caching)
+              RewriteRule ^$ index.html [QSA]
+              RewriteRule ^([^.]+)$ $1.html [QSA]
+              RewriteCond %{REQUEST_FILENAME} !-f
+              #
+              # no, so we redirect to our front web controller
+              RewriteRule ^(.*)$ index.php [QSA,L]
+              #
+            </directory>
+          </IfModule>
+        </VirtualHost>
+
+* enable the swOptimizePatternRouting class on production, edit the `factory.yml`
+
+  This plugin should be only used in production, you should only test your application
+  to ensure the routing will is matching
+
+          [yml]
+          prod:      
+            request:
+              class: sfWebRequest
+              param:
+                #path_info_key:     REQUEST_URI
+                #relative_url_root: ''
+      
+            routing:
+              class: swOptimizePatternRouting
+
+* enable a new config handler to handle the routing.yml file, create a new file config_handlers.yml
+
+          [yml]
+          config/routing.yml:
+            class:    swOptimizeRoutingConfigHandler
+
+
+* create the `mod_rewrite.conf` file
+
+          cd /Users/rande/Projects/cassoulet
+          ./symfony app:optimize-routes frontend apache > mod_rewrite.conf
+
+* restart your webserver and clear your cache
+
+
+## Troobleshootings
+
+You might experience some issues while you are using this plugin. First, keep
+in mind that parsing a route at two different level : server and symfony might no
+produce the same results. Routing translation can produce errors, you will find
+the most common issue here :
+
+ * trailing '/' as the end of an url, just remove it
+
+       * /news/ => /news
+
+ * Route orders, always put the shorten url at the end of a same group pattern :
+
+       * /news/create
+       * /news/:id
+       * /news
+
+ * Always add correct requirement pattern for any parameters
+
+ * ALWAYS USE NAMED ROUTES
+  
+   the `default` route should be removed !
+
+
+

@@ -1,0 +1,29 @@
+generate_rtf:
+  url: /generate-rtf/:type/:firstname/:lastname
+  param: { module: generate_rtf, action: index}
+
+users_export:
+  url:     /users/:id/export/:document
+  class:   sfDoctrineRoute
+  options: { model: sfGuardUser, type: object }
+  param:   { module: sf_guard_user, action: export }
+  requirements: { sf_method: get }
+
+simple_post_route:
+  url:     /trustee/edit
+  param: { module: hello, action: foo }
+  requirements: { sf_method: post }
+
+star_route:
+  url:  /address_add_building/:param1/:param2/*
+  param: { module: world, action: foo }
+  requirements: { sf_method: post }
+
+address:
+  class: sfDoctrineRouteCollection
+  options:
+    model:                Location
+    module:               mbAddress
+    prefix_path:          address
+    column:               id
+    with_wildcard_routes: true
