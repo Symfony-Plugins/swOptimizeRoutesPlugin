@@ -19,7 +19,8 @@ class swOptimizePatternRouting extends sfPatternRouting
 {
 
   protected
-    $raw_routes = array();
+    $raw_routes = array(),
+    $configuration = null;
     
   /**
    * @see sfRouting
@@ -121,16 +122,46 @@ class swOptimizePatternRouting extends sfPatternRouting
     return $this->fixGeneratedUrl($url, $absolute);
   }
 
+  /**
+   *
+   * The parameter should be used only for testing purpose, it also
+   * try to remove depency to the sfContext
+   *
+   * @param sfApplicationConfiguration $configuration
+   *
+   */
+  public function setConfiguration(sfApplicationConfiguration $configuration)
+  {
+
+    $this->configuration = $configuration;
+  }
+
+  /**
+   * return the sfApplicationConfiguration linked to the sfRouting
+   *
+   * @return sfApplicationConfiguration related to the sfRouting
+   */
+  public function getConfiguration()
+  {
+
+    return $this->configuration instanceof sfApplicationConfiguration ?   
+      $this->configuration :
+      sfContext::getInstance()->getConfiguration();
+  }
+
   public function loadConfiguration()
   {
 //    $time = microtime(true);
-    
-    $config = sfContext::getInstance()->getConfigCache()->checkConfig('config/routing.yml', true);
-    $this->setRoutes(include($config));
+
+    if ($this->options['load_configuration']
+      && $config =  $this->getConfiguration()->getConfigCache()->checkConfig('config/routing.yml', true))
+    {
+      $this->setRoutes(include($config));
+
+      $this->dispatcher->notify(new sfEvent($this, 'routing.load_configuration'));
+    }
 
 //    echo  microtime(true) - $time;
-    $this->dispatcher->notify(new sfEvent($this, 'routing.load_configuration'));
-
     
   }
 }
