@@ -16,6 +16,9 @@ function create_routing($options)
   $dispatcher = isset($options['dispatcher']) ? $options['dispatcher'] : new sfEventDispatcher;
   $cache      = isset($options['cache']) ? $options['cache'] : null;
   $configuration  = isset($options['configuration']) ? $options['configuration'] : null;
+  $load  = isset($options['load']) ? $options['load'] : true;
+  $class = isset($options['class']) ? $options['class'] : 'swOptimizePatternRouting';
+  
 
   if($tester) $tester->diag('Registering the swOptimizeRoutingConfigHandler config handler');
 
@@ -38,8 +41,11 @@ function create_routing($options)
   if($tester) $tester->diag('Create the configuration file');
   $config_file = $configuration->getConfigCache()->checkConfig($path, true);
 
-  $routing = new swOptimizePatternRouting($dispatcher, $cache, $routing_options);
-  $routing->setRoutes(include($config_file));
-
+  $routing = new $class($dispatcher, $cache, $routing_options);
+  if($load)
+  {
+    $routing->setRoutes(include($config_file));
+  }
+  
   return $routing;
 }
