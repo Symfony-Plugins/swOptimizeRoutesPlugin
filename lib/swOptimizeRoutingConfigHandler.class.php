@@ -35,12 +35,12 @@ class swOptimizeRoutingConfigHandler extends sfRoutingConfigHandler
 
     $export = array(
       'route_class' => get_class($route_instance),
-      'route_serialization' => gzdeflate($route_instance->serialize())
-//      'route_serialization' => $route_instance->serialize()
+      'route_serialization' => $route_instance->serialize()
     );
 
     $data[] = sprintf('\'%s\' => %s,', $name, var_export($export, 1));
   }
+
 
   public function execute($configFiles)
   {

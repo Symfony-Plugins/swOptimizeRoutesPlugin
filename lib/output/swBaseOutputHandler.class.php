@@ -20,6 +20,7 @@ abstract class swBaseOutputHandler
 
   protected
     $routing = null,
+    $url_prefix = '',
     $path_prefix = '/index.php';
 
 
@@ -29,9 +30,44 @@ abstract class swBaseOutputHandler
    * @param array $routes
    *
    */
-  public function __construct(sfRouting $routing)
+  public function __construct(sfRouting $routing, $options = array())
   {
+    
     $this->routing = $routing;
+    $this->path_prefix = $options['path_prefix'];
+    $this->url_prefix = $options['url_prefix'];
+  }
+
+  public function getMethods($methods)
+  {
+
+    if($methods === null)
+    {
+      $methods = array('OTHER');
+    }
+
+    if(!is_array($methods))
+    {
+      $methods = array($methods);
+    }
+
+    // clean the sf_format, as the sf_format
+    // is just simulated
+    $final_methods = array();
+    $simulated_formats = array('PUT', 'DELETE', 'HEAD');
+    foreach($methods as $method)
+    {
+      $method = strtoupper($method);
+
+      $final_methods[] = $method;
+      if( in_array($method, $simulated_formats) && !in_array('POST', $methods))
+      {
+        $final_methods[] = 'POST';
+      }
+    }
+
+
+    return $final_methods;
   }
 
   /**

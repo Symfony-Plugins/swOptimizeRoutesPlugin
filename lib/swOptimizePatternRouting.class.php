@@ -40,7 +40,7 @@ class swOptimizePatternRouting extends sfPatternRouting
       return $this->getRouteInformation($_GET['sf_route'], $url);
     }
 
-    throw new sfException('The route cannot be match by your server');
+    throw new sfException('The route cannot be match by the server');
     
     return parent::findRoute($url);
   }
@@ -77,26 +77,23 @@ class swOptimizePatternRouting extends sfPatternRouting
       $route_information = $this->raw_routes[$name];
 
       $class = $route_information['route_class'];
-      $data  = gzinflate($route_information['route_serialization']);
-//      $data  = $route_information['route_serialization'];
-
-
-      $options = array();
+      $data  = $route_information['route_serialization'];
 
       // set array in a config file
       // or add options to call the event dispatcher
+      $options = array();
       if(in_array($class, array('sfDoctrineRoute', 'sfPropelRoute')))
       {
         $options['model'] = 'foo';
         $options['type'] = 'object';
       }
-      
+
       $route = new $class('/foo', array(), array(), $options);
       $route->unserialize($data);
       
       $this->routes[$name] = $route;
 
-      if (true || $this->options['logging'])
+      if ($this->options['logging'])
       {
         $this->dispatcher->notify(new sfEvent($this, 'application.log', array(sprintf('Load route on demand "%s" (%s)', get_class($route), $name, $route->getPattern()))));
       }
@@ -151,8 +148,6 @@ class swOptimizePatternRouting extends sfPatternRouting
 
   public function loadConfiguration()
   {
-//    $time = microtime(true);
-
     if ($this->options['load_configuration']
       && $config =  $this->getConfiguration()->getConfigCache()->checkConfig('config/routing.yml', true))
     {
@@ -160,9 +155,6 @@ class swOptimizePatternRouting extends sfPatternRouting
 
       $this->dispatcher->notify(new sfEvent($this, 'routing.load_configuration'));
     }
-
-//    echo  microtime(true) - $time;
-    
   }
 }
 
