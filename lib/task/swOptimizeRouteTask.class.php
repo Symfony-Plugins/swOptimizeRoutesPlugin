@@ -30,6 +30,8 @@ class swOptimizeRouteTask extends sfBaseTask
 
     $this->addOptions(array(
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The plugin version'),
+      new sfCommandOption('url_prefix', null, sfCommandOption::PARAMETER_OPTIONAL, 'The url prefix', ''),
+      new sfCommandOption('path_prefix', null, sfCommandOption::PARAMETER_OPTIONAL, 'The path prefix', 'index.php'),
     ));
 
     $this->namespace = 'app';
@@ -81,10 +83,9 @@ EOF;
       ));
     }
 
-
     $class = $classes[$arguments['server']];
 
-    $output = new $class($routing);
+    $output = new $class($routing, $options);
 
     echo $output->generate();
   }

@@ -89,12 +89,10 @@ class swApacheOutputHandler extends swBaseOutputHandler
       $methods = $this->getMethods($requirements['sf_method']);
 
       $url = $this->fixUrl($route, $url, $sf_format);
-      $condition .= $this->renderCondition($name, $url, $sf_format);
-
+      
       foreach($methods as $method)
       {
-
-        $output[$method][] = $condition;
+        $output[$method][] = $this->renderCondition($name, $url, $sf_format, $method);
       }
     }
 
@@ -106,62 +104,29 @@ class swApacheOutputHandler extends swBaseOutputHandler
       $final_output .= "\n\n";
     }
 
-    if( count($output['PUT']) > 0)
+    foreach(array('PUT', 'HEAD', 'DELETE', 'GET', 'POST') as $sf_method)
     {
-      $final_output .= 'RewriteCond %{REQUEST_METHOD} "GET"';
-      $final_output .= "\n";
-      $final_output .= implode("\n", $output['GET']);
-
-      $final_output .= "\n\n";
+      if( count($output[$sf_method]) > 0)
+      {
+        $condition = sprintf('RewriteCond %%{REQUEST_METHOD} =%s', $sf_method);
+        
+        $final_output .= $condition."\n".implode("\n$condition\n", $output[$sf_method]);
+        $final_output .= "\n\n";
+      }
     }
     
-    if( count($output['HEAD']) > 0)
-    {
-      $final_output .= 'RewriteCond %{REQUEST_METHOD} "HEAD"';
-      $final_output .= "\n";
-      $final_output .= implode("\n", $output['HEAD']);
-
-      $final_output .= "\n\n";
-    }
-    
-    if( count($output['DELETE']) > 0)
-    {
-      $final_output .= 'RewriteCond %{REQUEST_METHOD} "DELETE"';
-      $final_output .= "\n";
-      $final_output .= implode("\n", $output['DELETE']);
-
-      $final_output .= "\n\n";
-    }
-    
-    if( count($output['GET']) > 0)
-    {
-      $final_output .= 'RewriteCond %{REQUEST_METHOD} "GET"';
-      $final_output .= "\n";
-      $final_output .= implode("\n", $output['GET']);
-
-      $final_output .= "\n\n";
-    }
-
-    if( count($output['POST']) > 0)
-    {
-      $final_output .= 'RewriteCond %{REQUEST_METHOD} "POST"';
-      $final_output .= "\n";
-      $final_output .= implode("\n", $output['POST']);
-
-      $final_output .= "\n\n";
-    }
-
     return $final_output;
   }
 
-  public function renderCondition($name, $url, $sf_format)
+  public function renderCondition($name, $url, $sf_format, $sf_method)
   {
     
-    return sprintf('RewriteRule ^%s%-60s %s?sf_route=%s [QSA,L]',
+    return sprintf('RewriteRule ^%s%-60s %s?sf_route=%s&sf_method=%s [QSA,L]',
       $this->url_prefix,
       $url,
       $this->path_prefix,
-      $name 
+      $name ,
+      $sf_method
     );
 
   }
