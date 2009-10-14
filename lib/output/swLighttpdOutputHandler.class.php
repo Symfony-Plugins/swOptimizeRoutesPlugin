@@ -15,9 +15,9 @@
  * @author     Thomas Rabaix <thomas.rabaix@soleoweb.com>
  * @version    SVN: $Id$
  */
-class swApacheOutputHandler extends swBaseOutputHandler
+class swLighttpdOutputHandler extends swBaseOutputHandler
 {
-
+  
   /**
    *
    * @see swBaseOutputHandler
@@ -37,9 +37,11 @@ class swApacheOutputHandler extends swBaseOutputHandler
     foreach($this->routing->getRoutes() as $name => $route)
     {
       $url = "";
-      $condition = "";
       $requirements = $route->getRequirements();
       $sf_format = false;
+      $pos_query_string = 1;
+      
+      // recompute the full ereg
       foreach($route->getTokens() as $val => $token)
       {
         if($val == 0) // remove starting /
@@ -54,8 +56,10 @@ class swApacheOutputHandler extends swBaseOutputHandler
           case 'text':
             if($token[2] == '*')
             {
-              
-              $requirement = '(.+)';
+              $url = substr($url, 0, -1);
+              $url .= '(/(.+)|)';
+
+              $pos_query_string += 2;
             }
             else if($token[2] == '.')
             {
@@ -69,13 +73,16 @@ class swApacheOutputHandler extends swBaseOutputHandler
             break;
 
           case 'variable':
+            $pos_query_string++;
             $variable = $token[3];
 
             if($variable == 'sf_format')
             {
+
               $url = substr($url, 0, -2);
-              $url .= '(\.([^/\.])+$|$)';
+              $url .= '(\.([^/\.])+|)';
               $sf_format = true;
+              $pos_query_string += 2;
             }
             else
             {
@@ -85,14 +92,33 @@ class swApacheOutputHandler extends swBaseOutputHandler
             break;
         }
       }
-
-      $methods = $this->getMethods($requirements['sf_method']);
-
-      $url = $this->fixUrl($route, $url, $sf_format);
       
+      // fix the computed url
+      $options = $route->getOptions();
+      $extra_parameters_as_query_string = $options['extra_parameters_as_query_string'];
+
+      $url = '('.$this->url_prefix.$url.')';
+      $pos_query_string++;
+       
+      if($extra_parameters_as_query_string == true)
+      {
+        $pos_query_string++;
+        $url .= '(\?(.*)|)';
+      }
+
+      // add the url to the differents route's method
+      $methods = $this->getMethods($requirements['sf_method']);
       foreach($methods as $method)
       {
-        $output[$method][] = $this->renderCondition($name, $url, $sf_format, $method);
+        
+        $condition = sprintf('"^%-70s => "%s/$1?sf_route=%s&$%d"',
+          $url."\"",
+          $this->path_prefix,
+          $name,
+          $pos_query_string
+        );
+
+        $output[$method][] = $condition;
       }
     }
 
@@ -106,46 +132,20 @@ class swApacheOutputHandler extends swBaseOutputHandler
 
     foreach(array('PUT', 'HEAD', 'DELETE', 'GET', 'POST') as $sf_method)
     {
-      if( count($output[$sf_method]) > 0)
+      if( count($output[$sf_method]) == 0)
       {
-        $condition = sprintf('RewriteCond %%{REQUEST_METHOD} =%s', $sf_method);
-        
-        $final_output .= $condition."\n".implode("\n$condition\n", $output[$sf_method]);
-        $final_output .= "\n\n";
+        continue;
       }
+
+      $final_output .= sprintf(
+        "\$HOST['request-method'] == '%s' { \n".
+        "  url.rewrite-once {\n".
+        "    %s \n".
+        "  }\n".
+        "}\n\n"
+      , $sf_method, implode("\n    ", $output[$sf_method]));
     }
     
     return $final_output;
-  }
-
-  public function renderCondition($name, $url, $sf_format, $sf_method)
-  {
-    
-    return sprintf('RewriteRule ^%s%-60s %s?sf_route=%s [QSA,L]',
-      $this->url_prefix,
-      $url,
-      $this->path_prefix,
-      $name
-    );
-
-  }
-
-
-  // NOTE to handle .:sf_format option : (\.([^/\.])+$|$)
-  public function fixUrl($route, $url, $sf_format)
-  {
-
-    $options = $this->routing->getOptions();
-    $extra_parameters_as_query_string = $options['extra_parameters_as_query_string'];
-
-    //$url = substr($url, 0); // remove starting slash
-
-    if($extra_parameters_as_query_string == true)
-    {
-
-      return $url.($sf_format ? '' : '$');
-    }
-
-    return $url.'(.+)'.($sf_format ? '' : '$');
   }
 }

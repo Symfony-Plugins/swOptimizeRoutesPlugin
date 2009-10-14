@@ -34,8 +34,15 @@ abstract class swBaseOutputHandler
   {
     
     $this->routing = $routing;
-    $this->path_prefix = $options['path_prefix'];
-    $this->url_prefix = $options['url_prefix'];
+
+    $this->initialize($options);
+  }
+
+  public function initialize($options)
+  {
+
+    $this->path_prefix = $options['path_prefix'] !== null ? $options['path_prefix'] : 'index.php';
+    $this->url_prefix = $options['url_prefix'] !== null ? $options['url_prefix'] : '/';
   }
 
   public function getMethods($methods)

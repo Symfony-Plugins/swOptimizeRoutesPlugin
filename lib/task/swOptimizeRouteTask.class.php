@@ -30,8 +30,8 @@ class swOptimizeRouteTask extends sfBaseTask
 
     $this->addOptions(array(
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The plugin version'),
-      new sfCommandOption('url_prefix', null, sfCommandOption::PARAMETER_OPTIONAL, 'The url prefix', ''),
-      new sfCommandOption('path_prefix', null, sfCommandOption::PARAMETER_OPTIONAL, 'The path prefix', 'index.php'),
+      new sfCommandOption('url_prefix', null, sfCommandOption::PARAMETER_OPTIONAL, 'The url prefix', null),
+      new sfCommandOption('path_prefix', null, sfCommandOption::PARAMETER_OPTIONAL, 'The path prefix', null),
     ));
 
     $this->namespace = 'app';
@@ -73,6 +73,7 @@ EOF;
 
     $classes = array(
       'apache' => 'swApacheOutputHandler',
+      'lighttpd' => 'swLighttpdOutputHandler',
     );
 
     if(!array_key_exists($arguments['server'], $classes))

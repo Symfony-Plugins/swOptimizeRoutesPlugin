@@ -18,9 +18,11 @@ function create_routing($options)
   $configuration  = isset($options['configuration']) ? $options['configuration'] : null;
   $load  = isset($options['load']) ? $options['load'] : true;
   $class = isset($options['class']) ? $options['class'] : 'swOptimizePatternRouting';
+  $config_class = isset($options['config_class']) ? $options['config_class'] : 'swOptimizeRoutingConfigHandler';
+
   
 
-  if($tester) $tester->diag('Registering the swOptimizeRoutingConfigHandler config handler');
+  if($tester) $tester->diag('Registering the '.$config_class.' config handler');
 
   if($configuration == null)
   {
@@ -28,7 +30,7 @@ function create_routing($options)
     throw new sfException('Please provide a valid configuration object');
   }
   
-  $configuration->getConfigCache()->registerConfigHandler($path, 'swOptimizeRoutingConfigHandler');
+  $configuration->getConfigCache()->registerConfigHandler($path, $config_class);
 
   $config_file = $configuration->getConfigCache()->checkConfig($path, true);
 
@@ -42,6 +44,7 @@ function create_routing($options)
   $config_file = $configuration->getConfigCache()->checkConfig($path, true);
 
   $routing = new $class($dispatcher, $cache, $routing_options);
+
   if($load)
   {
     $routing->setRoutes(include($config_file));
