@@ -24,15 +24,6 @@ class swLighttpdOutputHandler extends swBaseOutputHandler
    */
   public function generate()
   {
-
-    $output = array(
-      'HEAD' => array(),
-      'PUT' => array(),
-      'DELETE' => array(),
-      'POST' => array(),
-      'GET'  => array(),
-      'OTHER' => array(),
-    );
     
     foreach($this->routing->getRoutes() as $name => $route)
     {
@@ -118,21 +109,21 @@ class swLighttpdOutputHandler extends swBaseOutputHandler
           $pos_query_string
         );
 
-        $output[$method][] = $condition;
+        $this->output_by_methods[$method][] = $condition;
       }
     }
 
     $final_output = "";
     
-    if( count($output['OTHER']) > 0)
+    if( count($this->output_by_methods['OTHER']) > 0)
     {
-      $final_output .= implode("\n", $output['OTHER']);
+      $final_output .= implode("\n", $this->output_by_methods['OTHER']);
       $final_output .= "\n\n";
     }
 
     foreach(array('PUT', 'HEAD', 'DELETE', 'GET', 'POST') as $sf_method)
     {
-      if( count($output[$sf_method]) == 0)
+      if( count($this->output_by_methods[$sf_method]) == 0)
       {
         continue;
       }
@@ -143,7 +134,7 @@ class swLighttpdOutputHandler extends swBaseOutputHandler
         "    %s \n".
         "  }\n".
         "}\n\n"
-      , $sf_method, implode("\n    ", $output[$sf_method]));
+      , $sf_method, implode("\n    ", $this->output_by_methods[$sf_method]));
     }
     
     return $final_output;

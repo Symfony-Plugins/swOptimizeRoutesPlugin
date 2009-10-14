@@ -24,15 +24,6 @@ class swApacheOutputHandler extends swBaseOutputHandler
    */
   public function generate()
   {
-
-    $output = array(
-      'HEAD' => array(),
-      'PUT' => array(),
-      'DELETE' => array(),
-      'POST' => array(),
-      'GET'  => array(),
-      'OTHER' => array(),
-    );
     
     foreach($this->routing->getRoutes() as $name => $route)
     {
@@ -92,25 +83,25 @@ class swApacheOutputHandler extends swBaseOutputHandler
       
       foreach($methods as $method)
       {
-        $output[$method][] = $this->renderCondition($name, $url, $sf_format, $method);
+        $this->output_by_methods[$method][] = $this->renderCondition($name, $url, $sf_format, $method);
       }
     }
 
     $final_output = "";
     
-    if( count($output['OTHER']) > 0)
+    if( count($this->output_by_methods['OTHER']) > 0)
     {
-      $final_output .= implode("\n", $output['OTHER']);
+      $final_output .= implode("\n", $this->output_by_methods['OTHER']);
       $final_output .= "\n\n";
     }
 
     foreach(array('PUT', 'HEAD', 'DELETE', 'GET', 'POST') as $sf_method)
     {
-      if( count($output[$sf_method]) > 0)
+      if( count($this->output_by_methods[$sf_method]) > 0)
       {
         $condition = sprintf('RewriteCond %%{REQUEST_METHOD} =%s', $sf_method);
         
-        $final_output .= $condition."\n".implode("\n$condition\n", $output[$sf_method]);
+        $final_output .= $condition."\n".implode("\n$condition\n", $this->output_by_methods[$sf_method]);
         $final_output .= "\n\n";
       }
     }

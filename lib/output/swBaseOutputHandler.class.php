@@ -21,8 +21,15 @@ abstract class swBaseOutputHandler
   protected
     $routing = null,
     $url_prefix = '',
-    $path_prefix = '/index.php';
-
+    $path_prefix = '/index.php',
+    $output_by_methods = array(
+      'HEAD' => array(),
+      'PUT' => array(),
+      'DELETE' => array(),
+      'POST' => array(),
+      'GET'  => array(),
+      'OTHER' => array(),
+    );
 
   /**
    * Default contructor
